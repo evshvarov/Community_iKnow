@@ -1,6 +1,6 @@
 Include %IKPublic
 
-Class Community.iKnow.Post
+Class Community.iKnow.Answer
 {
 
 Parameter DomainName As STRING = "community";
@@ -16,7 +16,7 @@ ClassMethod GetConceptsByID(ID As %String) As %String
 	
 	do ##class(%iKnow.Queries.MetadataAPI).AddField(domId,"ID",,"NUMBER")
 	
-	set myquery = "SELECT ID, Text FROM Community.Post where ID = "_ID
+	set myquery = "SELECT ID, Text FROM Community.Comment where ID = "_ID
 	
 	set meta = $lb("ID")
 	set data = $lb("Text")
