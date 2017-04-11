@@ -50,8 +50,8 @@ ClassMethod GetConceptsByID(ID As %Integer, ByRef CList, Flg = 0) As %String
 	}
 }
 
-/// Возвращает все SETs по концептам 
-ClassMethod GetSETsByID(ID As %Integer) As %String
+/// Возвращает объединенные Sets и концепты по ID ответа
+ClassMethod GetSetsAdnConceptsByID(ID As %Integer) As %String
 {
 	set st = ..GetConceptsByID(ID, .CList, 1)
 	set ^AnswerSets(ID) = ""
@@ -64,9 +64,9 @@ ClassMethod GetSETsByID(ID As %Integer) As %String
 		set i=i+1
 		if $DATA(CList(i))
 		{  
-			if ($DATA(^SETs($list(CList(i),2))))
+			if ($DATA(^CommunityiKnowSets($list(CList(i),2))))
 			{
-				set ^out(^SETs($list(CList(i),2))) = ^SETs($list(CList(i),2))
+				set ^out(^CommunityiKnowSets($list(CList(i),2))) = ^CommunityiKnowSets($list(CList(i),2))
 			}else 
 			{
 				set result = result_","_$list(CList(i),2)
@@ -90,6 +90,17 @@ ClassMethod GetSETsByID(ID As %Integer) As %String
 				}
 			}
 		}
+	}
+}
+
+/// Возвращает Sets по ID ответа
+ClassMethod GetSetsByID(ID As %Integer) As %String
+{
+	if $DATA(^AnswerSets(ID))
+	{
+		return ^AnswerSets(ID)
+	}else{
+		return "SETS BY ID:"_ID_" DOES NOT EXIST"
 	}
 }
 

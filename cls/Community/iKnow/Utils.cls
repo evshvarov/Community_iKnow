@@ -3,9 +3,10 @@ Include %IKPublic
 Class Community.iKnow.Utils
 {
 
-/// FileName - указывает на файл с черным списком
+/// BLFileLocation - указывает на файл с черным списком
 Parameter BLFileLocation As STRING = "C:\InterSystems\iKnow\BLs.txt";
 
+/// BLFileLocation - указывает на файл с Sets
 Parameter SetsFileLocation As STRING = "C:\InterSystems\iKnow\Sets.txt";
 
 Parameter DomainName As STRING = "community";
@@ -25,7 +26,7 @@ ClassMethod setup() As %Status
 /// Для удаления выполнить команду "do ##class(Community.iKnow.Utils).remove()"
 ClassMethod remove() As %Status
 {
-	k ^SETs
+	k ^CommunityiKnowSets
 	do ..DeleteBlackLists()
 	do ..DeleteDomain(..#DomainName)
 	return $$$OK
@@ -133,7 +134,7 @@ ClassMethod AddSetsFromFile(FileName As %String = {..#SetsFileLocation}) As %Sta
 	
 	while 'stream.AtEnd {		
 		set line = stream.ReadLine()		
-		set ^SETs($p(line,",",1)) = $p(line,",",2)
+		set ^CommunityiKnowSets($p(line,",",1)) = $p(line,",",2)
 		write "   line: ",line," added",!
 	}
 }
@@ -197,7 +198,7 @@ ClassMethod UpdateBlackLists(domName As %String = {..#DomainName}, BLName As %St
 /// Функция для добавления Set
 ClassMethod AddSet(Concept As %String, Set As %String) As %Status
 {
-	set ^SETs(Concept) = Set
+	set ^CommunityiKnowSets(Concept) = Set
 	return $$$OK
 }
 
