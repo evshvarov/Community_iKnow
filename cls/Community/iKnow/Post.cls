@@ -1,6 +1,5 @@
 Include %IKPublic
 
-
 Class Community.iKnow.Post
 {
 
@@ -12,9 +11,9 @@ ClassMethod GetConceptsByID(ID As %Integer, ByRef CList, Flg = 0) As %String
 {
 	set domId  = ##class(%iKnow.Domain).GetOrCreateId(..#DomainName)
 
-	set source = ##class(Community.iKnow.ObjectSource).LocalReferanceIndexOpen(domId, ID)
+	set sourceId = ##class(%iKnow.Queries.SourceAPI).GetSourceId(domId, ":SQL:"_ID_":"_ID)
 	
-	set tFilter = $s(0:"", 1:##class(%iKnow.Filters.SourceIdFilter).%New(domId, source.SourceId))
+	set tFilter = $s(0:"", 1:##class(%iKnow.Filters.SourceIdFilter).%New(domId, sourceId))
 	
 	set blackListId = ##class(%iKnow.Utils.MaintenanceAPI).GetBlackListId(domId, ..#BlackLists)
 	
@@ -42,6 +41,7 @@ ClassMethod GetConceptsByID(ID As %Integer, ByRef CList, Flg = 0) As %String
 ClassMethod GetSetsAndConceptsByID(ID As %Integer) As %String
 {
 	set st = ..GetConceptsByID(ID, .CList, 1)
+
 	set ^PostSets(ID) = ""
 	
 	set i = 0
@@ -52,20 +52,30 @@ ClassMethod GetSetsAndConceptsByID(ID As %Integer) As %String
 		
 		set i=i+1
 		if $DATA(CList(i))
-		{ 
-			set $list(CList(i),2) = $tr($list(CList(i),2),",","")
-			set $list(CList(i),2) = $tr($list(CList(i),2),"?","")
+		{ 	
+			set concept = $list(CList(i),2)
 			
-			if (($l($list(CList(i),2),"&")>1) || ($l($list(CList(i),2),">")>1) || ($l($list(CList(i),2),"<")>1) || ($l($list(CList(i),2),"/")>1) || ($l($list(CList(i),2),"\")>1) || ($l($list(CList(i),2),"_")>1) || ($l($list(CList(i),2),"(")>1))
-			{
-				continue
+			set concept = $tr(concept,",","")
+			set concept = $tr(concept,"?","")
+			set concept = $tr(concept,"""","")
+			
+			set flag = 0
+			for s="&",">","<","###","!","/","\","(",")","+","#;"
+			{	
+				if ($l(concept, s) > 1)
+				{
+					set flag = 1
+					break
+				}
 			}
-			if ($DATA(^CommunityiKnowSets($list(CList(i),2))))
+			if flag = 1 continue
+
+			if ($DATA(^CommunityiKnowSets(concept)))
 			{
-				set ^out(^CommunityiKnowSets($list(CList(i),2))) = ^CommunityiKnowSets($list(CList(i),2))
+				set ^out(^CommunityiKnowSets(concept)) = ^CommunityiKnowSets(concept)
 			}else 
 			{
-				set result = result_","_$list(CList(i),2)
+				set result = result_","_concept
 			}
 
 		}else{
@@ -124,3 +134,4 @@ ClassMethod Update() As %Status
 }
 
 }
+

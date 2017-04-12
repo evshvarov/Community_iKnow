@@ -11,9 +11,9 @@ ClassMethod GetConceptsByID(ID As %Integer, ByRef CList, Flg = 0) As %String
 {
 	set domId  = ##class(%iKnow.Domain).GetOrCreateId(..#DomainName)
 
-	set source = ##class(Community.iKnow.ObjectSource).LocalReferanceIndexOpen(domId, ID)
+	set sourceId = ##class(%iKnow.Queries.SourceAPI).GetSourceId(domId, ":SQL:"_ID_":"_ID)
 	
-	set tFilter = $s(0:"", 1:##class(%iKnow.Filters.SourceIdFilter).%New(domId, source.SourceId))
+	set tFilter = $s(0:"", 1:##class(%iKnow.Filters.SourceIdFilter).%New(domId, sourceId))
 	
 	set blackListId = ##class(%iKnow.Utils.MaintenanceAPI).GetBlackListId(domId, ..#BlackLists)
 	

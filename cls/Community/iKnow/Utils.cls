@@ -125,7 +125,7 @@ ClassMethod CreateBlackLists(domName As %String, BLName As %String = {..#BlackLi
 	set sc = stream.LinkToFile(..#BLFileLocation)
 	
 	while 'stream.AtEnd {		
-		set line = stream.ReadLine()		
+		set line = stream.ReadLine()	
 		set sc = ##class(%iKnow.Utils.MaintenanceAPI).AddStringToBlackList(domainId, blackListId, line)
 		write "   line: ",line," added to black list",!
 	}
