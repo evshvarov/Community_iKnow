@@ -3,7 +3,7 @@ Include %IKPublic
 Class Community.iKnow.Post
 {
 
-Parameter DomainName As STRING = "community";
+Parameter DomainName As STRING = "CommunityPost";
 
 Parameter BlackLists As STRING = "BLcommunity";
 
@@ -11,27 +11,13 @@ ClassMethod GetConceptsByID(ID As %Integer, ByRef CList, Flg = 0) As %String
 {
 	set domId  = ##class(%iKnow.Domain).GetOrCreateId(..#DomainName)
 
-	set lister = ##class(%iKnow.Source.SQL.Lister).%New(domId)
-	set loader = ##class(%iKnow.Source.Loader).%New(domId)
+	set source = ##class(Community.iKnow.ObjectSource).LocalReferanceIndexOpen(domId, ID)
 	
-	do ##class(%iKnow.Queries.MetadataAPI).AddField(domId,"ID",,"NUMBER")
-	
-	set myquery = "SELECT ID, Text FROM Community.Post where ID = "_ID
-	
-	set meta = $lb("ID")
-	set data = $lb("Text")
-	set group = "ID"
-	set id = "ID"
-	
-	set tSC = lister.AddListToBatch(myquery, id, group, data, meta)
-	do loader.ProcessBatch()
+	set tFilter = $s(0:"", 1:##class(%iKnow.Filters.SourceIdFilter).%New(domId, source.SourceId))
 	
 	set blackListId = ##class(%iKnow.Utils.MaintenanceAPI).GetBlackListId(domId, ..#BlackLists)
 	
-	set count = ##class(%iKnow.Queries.EntityAPI).GetCountByDomain(domId)
-	set tSC = ##class(%iKnow.Queries.EntityAPI).GetTop(.CList, domId, 1, count, "", $$$FILTERONLY, $$$SORTBYDOMAINDEFAULT, $$$ENTTYPECONCEPT, 0, blackListId)
- 	
-	set tSC = ##class(%iKnow.Domain).%OpenId(domId).DropData(1, 1, 1, 0, 1)
+	set tSC = ##class(%iKnow.Queries.EntityAPI).GetTop(.CList, domId, 0, 0, tFilter, 11, 0, 0, 0, blackListId)
 
 	if (Flg = 1)
 	{
@@ -39,8 +25,9 @@ ClassMethod GetConceptsByID(ID As %Integer, ByRef CList, Flg = 0) As %String
 	}
 
 	set result =""
-	for i=1:1:count
-	{
+	set i = 0
+	while(1)
+	{	set i = i + 1
 		if $DATA(CList(i))
 		{ 
 			set result = result_","_$list(CList(i),2)
@@ -65,6 +52,13 @@ ClassMethod GetSetsAndConceptsByID(ID As %Integer) As %String
 		set i=i+1
 		if $DATA(CList(i))
 		{ 
+			set $list(CList(i),2) = $tr($list(CList(i),2),",","")
+			set $list(CList(i),2) = $tr($list(CList(i),2),"?","")
+			
+			if (($l($list(CList(i),2),",")>1) || ($l($list(CList(i),2),">")>1) || ($l($list(CList(i),2),".")>1) || ($l($list(CList(i),2),"/")>1) || ($l($list(CList(i),2),"\")>1) || ($l($list(CList(i),2),"_")>1))
+			{
+				continue
+			}
 			if ($DATA(^CommunityiKnowSets($list(CList(i),2))))
 			{
 				set ^out(^CommunityiKnowSets($list(CList(i),2))) = ^CommunityiKnowSets($list(CList(i),2))
@@ -103,6 +97,29 @@ ClassMethod GetSetsByID(ID As %Integer) As %String
 	}else{
 		return "SETS BY ID:"_ID_" DOES NOT EXIST"
 	}
+}
+
+ClassMethod Update() As %Status
+{
+	do ##class(Community.iKnow.Utils).CreateDomainIfNotExists(..#DomainName)
+	set domId  = ##class(%iKnow.Domain).GetOrCreateId(..#DomainName)
+
+	set lister = ##class(%iKnow.Source.SQL.Lister).%New(domId)
+	set loader = ##class(%iKnow.Source.Loader).%New(domId)
+	
+	do ##class(%iKnow.Queries.MetadataAPI).AddField(domId,"ID",,"NUMBER")
+	
+	set myquery = "SELECT ID, Text FROM Community.Post"
+	
+	set meta = $lb("ID")
+	set data = $lb("Text")
+	set group = "ID"
+	set id = "ID"
+	
+	set tSC = lister.AddListToBatch(myquery, id, group, data, meta)
+	do loader.ProcessBatch()
+	
+	return "OK"
 }
 
 }

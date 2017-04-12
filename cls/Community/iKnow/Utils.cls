@@ -9,17 +9,21 @@ Parameter BLFileLocation As STRING = "C:\InterSystems\iKnow\BLs.txt";
 /// BLFileLocation - указывает на файл с Sets
 Parameter SetsFileLocation As STRING = "C:\InterSystems\iKnow\Sets.txt";
 
-Parameter DomainName As STRING = "community";
+Parameter PostDomainName As STRING = "CommunityPost";
+
+Parameter AnswerDomainName As STRING = "CommunityAnswer";
 
 Parameter BlackLists As STRING = "BLcommunity";
 
 /// Для установки выполнить команду "do ##class(Community.iKnow.Utils).setup()"
 ClassMethod setup() As %Status
 {
-	do ..CreateDomainIfNotExists(..#DomainName)
-	do ##class(%iKnow.Domain).GetOrCreateId(..#DomainName)
+	
+	do ##class(Community.iKnow.Post).Update()
+	//do ##class(Community.iKnow.Answer).Update()
 	do ..AddSetsFromFile()
-	do ..CreateBlackLists()
+	do ..CreateBlackLists(..#PostDomainName)
+	//do ..CreateBlackLists(..#AnswerDomainName)
 	return $$$OK
 }
 
@@ -27,14 +31,16 @@ ClassMethod setup() As %Status
 ClassMethod remove() As %Status
 {
 	k ^CommunityiKnowSets
-	do ..DeleteBlackLists()
-	do ..DeleteDomain(..#DomainName)
+	do ..DeleteBlackLists(..#PostDomainName)
+	//do ..DeleteBlackLists(..#AnswerDomainName)
+	do ..DeleteDomain(..#PostDomainName)
+	//do ..DeleteDomain(..#AnswerDomainName)
 	return $$$OK
 }
 
 /// Удаление домена со всеми данными
 /// domName - имя удаляемого домена
-ClassMethod DeleteDomain(domName As %String = {..#DomainName}) As %Status
+ClassMethod DeleteDomain(domName As %String) As %Status
 {
 	if (##class(%iKnow.Domain).Exists(domName)) {
 		set domain  = ##class(%iKnow.Domain).Open(domName)
@@ -103,7 +109,7 @@ ClassMethod CreateDomain(domName As %String) As %iKnow.Domain
 /// содержит построчно перечисленные термины, "!" - в начале строки символ комментария
 /// domName - имя домена, в котором проводится действие
 /// BLName - имя формируемого в домене черного списка
-ClassMethod CreateBlackLists(domName As %String = {..#DomainName}, BLName As %String = {..#BlackLists}) As %Integer
+ClassMethod CreateBlackLists(domName As %String, BLName As %String = {..#BlackLists}) As %Integer
 {
  
 	if (##class(%iKnow.Domain).Exists(domName)) {
@@ -142,7 +148,7 @@ ClassMethod AddSetsFromFile(FileName As %String = {..#SetsFileLocation}) As %Sta
 /// Метод удаляет черный список
 /// domName - имя домена, в котором проводится действие
 /// BLName - имя удаляемого в домене черного списка
-ClassMethod DeleteBlackLists(domName As %String = {..#DomainName}, BLName As %String = {..#BlackLists}) As %Status
+ClassMethod DeleteBlackLists(domName As %String, BLName As %String = {..#BlackLists}) As %Status
 {
 	if (##class(%iKnow.Domain).Exists(domName)) {
 		set domainId = ##class(%iKnow.Domain).GetOrCreateId(domName)
@@ -170,7 +176,7 @@ ClassMethod DeleteBlackLists(domName As %String = {..#DomainName}, BLName As %St
 /// содержит построчно перечисленные термины, "!" - в начале строки символ комментария
 /// domName - имя домена, в котором проводится действие
 /// BLName - имя формируемого в домене черного списка
-ClassMethod UpdateBlackLists(domName As %String = {..#DomainName}, BLName As %String = {..#BlackLists}) As %Status
+ClassMethod UpdateBlackLists(domName As %String, BLName As %String = {..#BlackLists}) As %Status
 {
 	
 	if (##class(%iKnow.Domain).Exists(domName)) {
