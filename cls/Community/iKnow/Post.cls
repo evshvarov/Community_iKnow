@@ -55,7 +55,7 @@ ClassMethod GetSetsAndConceptsByID(ID As %Integer) As %String
 			set $list(CList(i),2) = $tr($list(CList(i),2),",","")
 			set $list(CList(i),2) = $tr($list(CList(i),2),"?","")
 			
-			if (($l($list(CList(i),2),",")>1) || ($l($list(CList(i),2),">")>1) || ($l($list(CList(i),2),".")>1) || ($l($list(CList(i),2),"/")>1) || ($l($list(CList(i),2),"\")>1) || ($l($list(CList(i),2),"_")>1))
+			if (($l($list(CList(i),2),">")>1) || ($l($list(CList(i),2),".")>1) || ($l($list(CList(i),2),"/")>1) || ($l($list(CList(i),2),"\")>1) || ($l($list(CList(i),2),"_")>1) || ($l($list(CList(i),2),"(")>1))
 			{
 				continue
 			}
@@ -123,4 +123,3 @@ ClassMethod Update() As %Status
 }
 
 }
-
